@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <!-- use xlsx.full.min.js from version 0.20.1 -->
+    <script src="/js/xlsx.full.min.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            const button = document.getElementById('btn-xlsx-download');
+            button.addEventListener('click', async function () {
+
+                const url = '/books';
+
+                /* fetch JSON data and parse */
+                const rows = await (await fetch(url)).json();
+
+                console.log(rows);
+
+                /* generate worksheet and workbook */
+                const worksheet = XLSX.utils.json_to_sheet(rows);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Books");
+
+                const header = [
+                    ['제목', '저자', '가격']
+                ];
+
+                /* fix headers */
+                XLSX.utils.sheet_add_aoa(worksheet, header, { origin: "A1" });
+
+                /* calculate column width */
+                // const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 10);
+                // worksheet["!cols"] = [ { wch: max_width } ];
+
+                /* create an XLSX file and try to save to Books.xlsx */
+                XLSX.writeFile(workbook, "Books.xlsx", {compression: true});
+
+            });
+        };
+    </script>
+</head>
+<body>
+<button id="btn-xlsx-download">xlsx 다운로드</button>
+</body>
+</html>
