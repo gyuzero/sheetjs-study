@@ -5,6 +5,7 @@
     <title>Home</title>
     <!-- use xlsx.full.min.js from version 0.20.1 -->
     <script src="/js/xlsx.full.min.js"></script>
+    <script src="/js/FileSaver.min.js"></script>
     <script type="text/javascript">
         window.onload = function () {
             const button = document.getElementById('btn-xlsx-download');
@@ -14,8 +15,6 @@
 
                 /* fetch JSON data and parse */
                 const rows = await (await fetch(url)).json();
-
-                console.log(rows);
 
                 /* generate worksheet and workbook */
                 const worksheet = XLSX.utils.json_to_sheet(rows);
@@ -34,10 +33,19 @@
                 // worksheet["!cols"] = [ { wch: max_width } ];
 
                 /* create an XLSX file and try to save to Books.xlsx */
-                XLSX.writeFile(workbook, "Books.xlsx", {compression: true});
+                let wbout = XLSX.write(workbook, {bookType: 'xlsx', type: 'binary'});
 
+                saveAs(new Blob([s2ab(wbout)], {type: 'application/octet-stream'}), 'Books.xlsx');
             });
         };
+
+        // Helper function to convert data to array buffer
+        function s2ab(s) {
+            let buf = new ArrayBuffer(s.length);
+            let view = new Uint8Array(buf);
+            for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
+        }
     </script>
 </head>
 <body>
